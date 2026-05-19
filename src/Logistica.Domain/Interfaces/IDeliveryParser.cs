@@ -1,15 +1,11 @@
-﻿using Logistica.Domain.Entities;
-using System.Runtime.CompilerServices;
+using Logistica.Domain.Entities;
 
-namespace Logistica.Domain.Interfaces
+namespace Logistica.Domain.Interfaces;
+
+public interface IDeliveryParser
 {
-    public interface IDeliveryParser
-    {
-        string FormatId { get; }
+    string FormatId { get; }
 
 
-        IAsyncEnumerable<(DeliveryOrder? Order, DeliveryError? Error)> ParseAsync(
-            Stream stream,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default);
-    }
+    IAsyncEnumerable<(DeliveryOrder? Order, DeliveryError? Error)> ParseAsync(Stream stream, CancellationToken cancellationToken = default);
 }

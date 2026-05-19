@@ -12,9 +12,8 @@ namespace Logistica.LoadTests
 {
     public class FileUploadLoadTest
     {
-        // Se usa Skip para evitar que este test bloquee los pipelines de CI regulares. 
-        // Normalmente las pruebas de carga se ejecutan en un entorno dedicado o un paso específico del pipeline.
-        [Fact(Skip = "Requiere que la API esté corriendo en el puerto 5000. Quitar Skip para ejecución local.")]
+        [Fact]
+        [Trait("Category", "LoadTest")]
         public void UploadFile_LoadTest_ConcurrentUsers()
         {
             // Arrange
@@ -29,7 +28,14 @@ namespace Logistica.LoadTests
                 csvPayload.AppendLine("OrderId,Customer,Address,DeliveryDate,Weight");
                 for (int i = 0; i < 50; i++) // Lote de 50 registros por request
                 {
-                    csvPayload.AppendLine($"ORD-{Guid.NewGuid().ToString().Substring(0, 8)},User {i},Dir {i},2025-01-01,10.5");
+                    var guidPrefix = Guid.NewGuid().ToString().AsSpan(0, 8);
+                    csvPayload.Append("ORD-");
+                    csvPayload.Append(guidPrefix);
+                    csvPayload.Append(",User ");
+                    csvPayload.Append(i);
+                    csvPayload.Append(",Dir ");
+                    csvPayload.Append(i);
+                    csvPayload.AppendLine(",2025-01-01,10.5");
                 }
 
                 using var content = new MultipartFormDataContent();

@@ -36,14 +36,16 @@ namespace Logistica.UnitTests.Domain
         public void Validate_MissingOrderId_ReturnsIdentityError(string? invalidOrderId, string expectedErrorCode)
         {
             // Arrange
-            var order = new DeliveryOrder(invalidOrderId, "Juan", "Calle 1", DateTime.UtcNow, 1m);
+            // FIX CS8604: El operador '!' indica que pasamos null intencionalmente para probar la validación.
+            // La anotación nullable se mantiene en la firma para documentar el intent del test.
+            var order = new DeliveryOrder(invalidOrderId!, "Juan", "Calle 1", DateTime.UtcNow, 1m);
 
             // Act
             var errors = OrderValidator.Validate(order, rowNumber: 2).ToList();
 
             // Assert
             Assert.Single(errors);
-            Assert.Equal(expectedErrorCode, errors.First().ErrorCode);
+            Assert.Equal(expectedErrorCode, errors[0].ErrorCode); // FIX S6608: [0] en vez de .First()
         }
 
         [Theory]
@@ -59,7 +61,7 @@ namespace Logistica.UnitTests.Domain
 
             // Assert
             Assert.Single(errors);
-            Assert.Equal("INVALID_DESTINATION", errors.First().ErrorCode);
+            Assert.Equal("INVALID_DESTINATION", errors[0].ErrorCode); // FIX S6608: [0] en vez de .First()
         }
 
         [Theory]
@@ -76,7 +78,7 @@ namespace Logistica.UnitTests.Domain
 
             // Assert
             Assert.Single(errors);
-            Assert.Equal("INVALID_WEIGHT", errors.First().ErrorCode);
+            Assert.Equal("INVALID_WEIGHT", errors[0].ErrorCode); // FIX S6608: [0] en vez de .First()
         }
 
         [Fact]
@@ -91,7 +93,7 @@ namespace Logistica.UnitTests.Domain
 
             // Assert
             Assert.Single(errors);
-            Assert.Equal("INVALID_DATE", errors.First().ErrorCode);
+            Assert.Equal("INVALID_DATE", errors[0].ErrorCode); // FIX S6608: [0] en vez de .First()
         }
 
         [Fact]

@@ -2,47 +2,46 @@ using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 
-namespace Logistica.API.Middleware
+namespace Logistica.API.Middleware;
+
+public class GlobalExceptionMiddleware
 {
-    public class GlobalExceptionMiddleware
+    private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionMiddleware> _logger;
+
+    public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<GlobalExceptionMiddleware> _logger;
+        _next = next;
+        _logger = logger;
+    }
 
-        public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
+    public async Task InvokeAsync(HttpContext context)
+    {
+        try
         {
-            _next = next;
-            _logger = logger;
+            
+            await _next(context);
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        catch (Exception ex)
         {
-            try
-            {
-                // Continuar con el pipeline
-                await _next(context);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Se ha producido una excepción no controlada en el sistema.");
-                await HandleExceptionAsync(context, ex);
-            }
+            _logger.LogError(ex, "Se ha producido una excepción no controlada en el sistema.");
+            await HandleExceptionAsync(context);
         }
+    }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private static Task HandleExceptionAsync(HttpContext context)
+    {
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+        var response = new
         {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            statusCode = context.Response.StatusCode,
+            errorCode = "INTERNAL_SERVER_ERROR",
+            message = "Ha ocurrido un error inesperado procesando la solicitud. Por favor, contacte a soporte."
+        };
 
-            var response = new
-            {
-                statusCode = context.Response.StatusCode,
-                errorCode = "INTERNAL_SERVER_ERROR",
-                message = "Ha ocurrido un error inesperado procesando la solicitud. Por favor, contacte a soporte."
-            };
-
-            var jsonResponse = JsonSerializer.Serialize(response);
-            return context.Response.WriteAsync(jsonResponse);
-        }
+        var jsonResponse = JsonSerializer.Serialize(response);
+        return context.Response.WriteAsync(jsonResponse);
     }
 }

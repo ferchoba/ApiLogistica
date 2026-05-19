@@ -4,103 +4,96 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Xml;
 
-namespace Logistica.Infrastructure.Parsers
+namespace Logistica.Infrastructure.Parsers;
+
+public class XmlParser : IDeliveryParser
 {
-    public class XmlParser : IDeliveryParser
+    public string FormatId => "XML";
+
+    public async IAsyncEnumerable<(DeliveryOrder? Order, DeliveryError? Error)> ParseAsync(
+        Stream stream,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        public string FormatId => "XML";
+        var settings = new XmlReaderSettings { Async = true, IgnoreWhitespace = true };
+        using var reader = XmlReader.Create(stream, settings);
+        int rowNumber = 0;
 
-        public async IAsyncEnumerable<(DeliveryOrder? Order, DeliveryError? Error)> ParseAsync(
-            Stream stream,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        while (await reader.ReadAsync())
         {
-            
-            var settings = new XmlReaderSettings { Async = true, IgnoreWhitespace = true };
-            using var reader = XmlReader.Create(stream, settings);
+            cancellationToken.ThrowIfCancellationRequested();
 
-            int rowNumber = 0;
+            if (!IsDeliveryElement(reader)) continue;
 
-            while (await reader.ReadAsync())
+            rowNumber++;
+            yield return await ParseDeliveryNodeAsync(reader, rowNumber);
+        }
+    }
+
+
+    private static bool IsDeliveryElement(XmlReader reader)
+        => reader.NodeType == XmlNodeType.Element && reader.Name == "Delivery";
+
+
+    private static async Task<(DeliveryOrder? Order, DeliveryError? Error)> ParseDeliveryNodeAsync(
+        XmlReader reader, int rowNumber)
+    {
+        var fields = new DeliveryFields();
+
+        try
+        {
+            await ReadDeliveryFieldsAsync(reader, fields);
+        }
+        catch (Exception ex)
+        {
+            return (null, new DeliveryError(rowNumber, fields.OrderId, "PARSE_ERROR",
+                $"Error procesando nodo XML: {ex.Message}"));
+        }
+
+        if (string.IsNullOrWhiteSpace(fields.OrderId))
+        {
+            return (null, new DeliveryError(rowNumber, "N/A", "INVALID_FORMAT",
+                "Falta el nodo obligatorio <Code>."));
+        }
+
+        
+
+        var order = new DeliveryOrder(
+            OrderId: fields.OrderId.Trim(),
+            Customer: fields.Customer.Trim(),
+            Address: fields.Address.Trim(),
+            DeliveryDate: DateTime.ParseExact(fields.DateStr.Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture),
+            Weight: decimal.Parse(fields.WeightStr.Trim(), CultureInfo.InvariantCulture)
+        );
+
+        return (order, null);
+    }
+
+
+    private static async Task ReadDeliveryFieldsAsync(XmlReader reader, DeliveryFields fields)
+    {
+        using var subReader = reader.ReadSubtree();
+        while (await subReader.ReadAsync())
+        {
+            if (subReader.NodeType != XmlNodeType.Element) continue;
+
+            switch (subReader.Name)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                
-                if (reader.NodeType == XmlNodeType.Element && reader.Name == "Delivery")
-                {
-                    rowNumber++;
-                    string orderId = string.Empty;
-                    string customer = string.Empty;
-                    string address = string.Empty;
-                    string dateStr = string.Empty;
-                    string weightStr = string.Empty;
-
-                    DeliveryOrder? order = null;
-                    DeliveryError? error = null;
-                    bool missingCode = false;
-
-                    try
-                    {
-                        
-                        using var subReader = reader.ReadSubtree();
-                        while (await subReader.ReadAsync())
-                        {
-                            if (subReader.NodeType == XmlNodeType.Element)
-                            {
-                                switch (subReader.Name)
-                                {
-                                    case "Code":
-                                        orderId = await subReader.ReadElementContentAsStringAsync();
-                                        break;
-                                    case "ClientName":
-                                        customer = await subReader.ReadElementContentAsStringAsync();
-                                        break;
-                                    case "Location":
-                                        address = await subReader.ReadElementContentAsStringAsync();
-                                        break;
-                                    case "Date":
-                                        dateStr = await subReader.ReadElementContentAsStringAsync();
-                                        break;
-                                    case "Kg":
-                                        weightStr = await subReader.ReadElementContentAsStringAsync();
-                                        break;
-                                }
-                            }
-                        }
-
-                        if (string.IsNullOrWhiteSpace(orderId))
-                        {
-                            missingCode = true;
-                        }
-                        else
-                        {
-                            order = new DeliveryOrder(
-                                OrderId: orderId.Trim(),
-                                Customer: customer.Trim(),
-                                Address: address.Trim(),
-                                DeliveryDate: DateTime.ParseExact(dateStr.Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture),
-                                Weight: decimal.Parse(weightStr.Trim(), CultureInfo.InvariantCulture)
-                            );
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        error = new DeliveryError(rowNumber, orderId, "PARSE_ERROR", $"Error procesando nodo XML: {ex.Message}");
-                    }
-
-                    if (missingCode)
-                    {
-                        yield return (null, new DeliveryError(rowNumber, "N/A", "INVALID_FORMAT", "Falta el nodo obligatorio <Code>."));
-                    }
-                    else if (error != null)
-                    {
-                        yield return (null, error);
-                    }
-                    else if (order != null)
-                    {
-                        yield return (order, null);
-                    }
-                }
+                case "Code":       fields.OrderId = await subReader.ReadElementContentAsStringAsync(); break;
+                case "ClientName": fields.Customer = await subReader.ReadElementContentAsStringAsync(); break;
+                case "Location":   fields.Address = await subReader.ReadElementContentAsStringAsync(); break;
+                case "Date":       fields.DateStr = await subReader.ReadElementContentAsStringAsync(); break;
+                case "Kg":         fields.WeightStr = await subReader.ReadElementContentAsStringAsync(); break;
             }
         }
+    }
+
+
+    private sealed class DeliveryFields
+    {
+        public string OrderId { get; set; } = string.Empty;
+        public string Customer { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string DateStr { get; set; } = string.Empty;
+        public string WeightStr { get; set; } = string.Empty;
     }
 }

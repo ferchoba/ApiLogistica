@@ -1,10 +1,9 @@
 using Logistica.Domain.Entities;
 using System.Collections.Generic;
 
-namespace Logistica.Domain.Interfaces
+namespace Logistica.Domain.Interfaces;
+
+public interface IDeliveryRepository
 {
-    public interface IDeliveryRepository
-    {
-        Task BulkInsertAsync(IReadOnlyList<DeliveryOrder> orders, CancellationToken cancellationToken = default);
-    }
+    Task BulkInsertAsync(IReadOnlyList<DeliveryOrder> orders, CancellationToken cancellationToken = default);
 }
