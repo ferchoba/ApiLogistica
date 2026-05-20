@@ -4,7 +4,18 @@ Logistica es una plataforma para la agregar, validar y orquestar diferentes form
 
 ## Arquitectura Base
 
-El sistema está construido siguiendo los principios de **Clean Architecture**, asegurando un bajo acoplamiento y alta cohesión mediante la separación estricta en capas (API, Application, Domain, Infrastructure).
+El sistema está construido siguiendo los principios de **la Arquitectura hexagonal**, asegurando un bajo acoplamiento y alta cohesión mediante la separación estricta en capas (API, Application, Domain, Infrastructure).
+
+## Decisión técnica
+
+La arquitectura Hexagonal permite cumplir directamente los objetivos clave del negocio:
+
+* Soportar múltiples operadores.
+* Incorporar nuevos formatos sin romper los existentes.
+* Desacoplar reglas de negocio.
+* Mejorar mantenibilidad.
+* Facilitar testing.
+* Reducir impacto de cambios futuros.
 
 ## Prerrequisitos
 
@@ -26,7 +37,7 @@ Sigue estos pasos desde tu terminal para compilar y ejecutar el proyecto localme
 3. **Ejecutar el proyecto API:**
    dotnet run --project src/Logistica.API/Logistica.API.csproj
 
-   *(El puerto por defecto se mostrará en la consola una vez la aplicación inicie, típicamente `https://localhost:5001` o `http://localhost:5000`)*.
+   *(El puerto por defecto se mostrará en la consola una vez la aplicación inicie, típicamente `https://localhost:7163` o `http://localhost:5297`)*.
 
 ## Uso de la API (Swagger)
 

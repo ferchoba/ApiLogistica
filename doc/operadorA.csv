@@ -1,0 +1,10 @@
+OrderId,Customer,Address,DeliveryDate,Weight
+ORD00001,Elena Cano,Carrera 15 #40-20,2026-06-01,35.0
+ORD00002,Elena Cano,Diagonal 45 #12-34,2026-05-26,4.97
+ORD00003,Ana Torres,Av 30 #50-10,2026-06-09,24.93
+ORD00004,Pedro Infante,Calle 10 #20-30,2026-06-03,7.14
+ORD00005,Maria Diaz,Av 30 #50-10,2026-05-25,20.54
+ORD00006,Laura Gómez,Calle 10 #20-30,2026-05-12,33.8
+ORD00007,Sebastian Mora,Calle 100 #20-10,2026-05-17,21.49
+ORD00008,Juan Perez,Carrera 15 #40-20,2026-05-18,35.6
+ORD00009,Maria Diaz,Calle 10 #20-30,2026-06-07,2.19
