@@ -68,6 +68,18 @@
     <value>Excepción no controlada en el pipeline de la API para la ruta {0} y método {1}.</value>
   </data>
   <data name="Http_InternalServerError" xml:space="preserve">
-    <value>Ha ocurrido un error inesperado procesando la solicitud. Por favor, contacte a soporte.</value>
+    <value>Ha ocurrido un error inesperado procesando la solicitud.</value>
+  </data>
+  <data name="FormatGuard_EmptyFile" xml:space="preserve">
+    <value>El archivo no puede ser nulo o vacío.</value>
+  </data>
+  <data name="FormatGuard_UnsupportedFormat" xml:space="preserve">
+    <value>El formato de destino '{0}' no es soportado por el sistema.</value>
+  </data>
+  <data name="FormatGuard_ExtensionMismatch" xml:space="preserve">
+    <value>Inconsistencia de formato: El archivo '{0}' tiene extensión '{1}', la cual no coincide con el formato declarado '{2}' (se esperaba: {3}).</value>
+  </data>
+  <data name="FormatGuard_MimeTypeMismatch" xml:space="preserve">
+    <value>Inconsistencia de seguridad de formato: El archivo declara un Content-Type '{0}', el cual no es compatible con el formato '{1}'.</value>
   </data>
 </root>

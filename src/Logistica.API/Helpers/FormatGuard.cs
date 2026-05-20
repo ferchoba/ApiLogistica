@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
+using Logistica.API.Resources;
 
 namespace Logistica.API.Helpers;
 
@@ -19,23 +20,25 @@ public static class FormatGuard
     public static string? ValidateFileMatchesFormat(string formatId, IFormFile file)
     {
         if (file == null)
-            return "El archivo no puede ser nulo o vacío.";
+        {
+            return ApiMessages.FormatGuard_EmptyFile;
+        }
 
         if (!AllowedFormats.TryGetValue(formatId, out var allowed))
-            return $"El formato de destino '{formatId}' no es soportado por el sistema.";
+        {
+            return string.Format(ApiMessages.FormatGuard_UnsupportedFormat, formatId);
+        }
 
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!allowed.Extensions.Contains(extension))
         {
-            return $"Inconsistencia de formato: El archivo '{file.FileName}' tiene extensión '{extension}', " +
-                   $"la cual no coincide con el formato declarado '{formatId.ToUpperInvariant()}' (se esperaba: {string.Join(" o ", allowed.Extensions)}).";
+            return string.Format(ApiMessages.FormatGuard_ExtensionMismatch,file.FileName,extension,formatId.ToUpperInvariant(),string.Join(" o ", allowed.Extensions));
         }
 
         var contentType = file.ContentType?.ToLowerInvariant();
         if (!string.IsNullOrEmpty(contentType) && !allowed.MimeTypes.Contains(contentType))
         {
-            return $"Inconsistencia de seguridad de formato: El archivo declara un Content-Type '{contentType}', " +
-                   $"el cual no es compatible con el formato '{formatId.ToUpperInvariant()}'.";
+            return string.Format(ApiMessages.FormatGuard_MimeTypeMismatch,contentType,formatId.ToUpperInvariant());
         }
 
         return null;

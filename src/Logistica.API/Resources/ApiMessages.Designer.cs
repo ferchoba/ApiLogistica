@@ -58,5 +58,29 @@ namespace Logistica.API.Resources {
                 return ResourceManager.GetString("Http_InternalServerError", resourceCulture) ?? string.Empty;
             }
         }
+        
+        public static string FormatGuard_EmptyFile {
+            get {
+                return ResourceManager.GetString("FormatGuard_EmptyFile", resourceCulture) ?? string.Empty;
+            }
+        }
+        
+        public static string FormatGuard_UnsupportedFormat {
+            get {
+                return ResourceManager.GetString("FormatGuard_UnsupportedFormat", resourceCulture) ?? string.Empty;
+            }
+        }
+        
+        public static string FormatGuard_ExtensionMismatch {
+            get {
+                return ResourceManager.GetString("FormatGuard_ExtensionMismatch", resourceCulture) ?? string.Empty;
+            }
+        }
+        
+        public static string FormatGuard_MimeTypeMismatch {
+            get {
+                return ResourceManager.GetString("FormatGuard_MimeTypeMismatch", resourceCulture) ?? string.Empty;
+            }
+        }
     }
 }

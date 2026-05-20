@@ -4,6 +4,7 @@ using Logistica.Domain.Rules;
 using Logistica.Domain.Constants;
 using Logistica.Application.Dtos;
 using Logistica.Application.Resources;
+using Logistica.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Threading.Channels;
 
@@ -76,18 +77,21 @@ public class NormalizationOrchestratorService(
         int totalSuccessful = 0;
         int totalFailed = 0;
 
-        await foreach ((DeliveryOrder? orderItem, DeliveryError? errorItem) in reader.ReadAllAsync(cancellationToken))
+        await foreach (var item in reader.ReadAllAsync(cancellationToken))
         {
             totalProcessed++;
 
-            if (errorItem != null)
+            if (item is { Error: not null and var error })
             {
-                errors.Add(errorItem);
+                errors.Add(error);
                 totalFailed++;
                 continue;
             }
 
-            DeliveryOrder order = orderItem!;
+            if (item is not { Order: not null and var order })
+            {
+                continue;
+            }
 
             if (!processedIds.Add(order.OrderId))
             {
@@ -96,8 +100,7 @@ public class NormalizationOrchestratorService(
                 continue;
             }
 
-            List<DeliveryError> validationErrors = OrderValidator.Validate(order, totalProcessed).ToList();
-            if (validationErrors.Count != 0)
+            if (OrderValidator.Validate(order, totalProcessed).ToList() is { Count: > 0 } validationErrors)
             {
                 errors.AddRange(validationErrors);
                 totalFailed++;

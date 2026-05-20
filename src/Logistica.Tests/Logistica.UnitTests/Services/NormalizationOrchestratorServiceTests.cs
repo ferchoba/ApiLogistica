@@ -29,7 +29,7 @@ namespace Logistica.UnitTests.Services
             
             using var dummyStream = new MemoryStream();
             var order1 = new DeliveryOrder("ORD-001", "Cliente A", "Dir 1", DateTime.Now, 10m);
-            var order2 = new DeliveryOrder("ORD-001", "Cliente B", "Dir 2", DateTime.Now, 20m); // Identificador duplicado
+            var order2 = new DeliveryOrder("ORD-001", "Cliente B", "Dir 2", DateTime.Now, 20m);
 
             _parserMock.Setup(p => p.FormatId).Returns("MOCK_PARSER");
             
@@ -56,9 +56,7 @@ namespace Logistica.UnitTests.Services
             Assert.Single(response.Errors);
             Assert.Equal("DUPLICATE_ORDER", response.Errors.First().ErrorCode);
 
-            _repositoryMock.Verify(r => r.BulkInsertAsync(
-                It.Is<IReadOnlyList<DeliveryOrder>>(b => b.Count == 1), 
-                It.IsAny<CancellationToken>()), Times.Once);
+            _repositoryMock.Verify(r => r.BulkInsertAsync(It.Is<IReadOnlyList<DeliveryOrder>>(b => b.Count == 1),It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }

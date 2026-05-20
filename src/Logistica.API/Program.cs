@@ -1,6 +1,7 @@
 using Logistica.Domain.Interfaces;
-using Logistica.Application.Services;
+using Logistica.Application.Interfaces;
 using Logistica.Infrastructure;
+using Logistica.Application;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +9,7 @@ builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration
 
 builder.Services.AddInfrastructure();
 
-builder.Services.AddScoped<INormalizationOrchestrator, NormalizationOrchestratorService>();
+builder.Services.AddApplication();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

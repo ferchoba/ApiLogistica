@@ -22,53 +22,51 @@ public class JsonParser : IDeliveryParser
 
     public string FormatId => "JSON";
 
-    public async IAsyncEnumerable<(DeliveryOrder? Order, DeliveryError? Error)> ParseAsync(
+    public IAsyncEnumerable<(DeliveryOrder? Order, DeliveryError? Error)> ParseAsync(
         Stream stream,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
-        int rowNumber = 0;
-        IAsyncEnumerable<JsonDto?>? items = null;
-
-        bool initError = false;
-        string initErrorMessage = string.Empty;
-
         try
         {
-            items = JsonSerializer.DeserializeAsyncEnumerable<JsonDto>(stream, _serializerOptions, cancellationToken);
+            var items = JsonSerializer.DeserializeAsyncEnumerable<JsonDto>(stream, _serializerOptions, cancellationToken);
+            return ParseItemsAsync(items, cancellationToken);
         }
         catch (Exception ex)
         {
-            initError = true;
-            initErrorMessage = ex.Message;
+            return GetErrorEnumerable(ex.Message);
         }
+    }
 
-        if (initError)
-        {
-            yield return (null, new DeliveryError(0, "N/A", "JSON_ROOT_ERROR", string.Format(InfraMessages.Parser_InvalidJsonStructure, initErrorMessage)));
-            yield break;
-        }
+    private static async IAsyncEnumerable<(DeliveryOrder? Order, DeliveryError? Error)> GetErrorEnumerable(
+        string errorMessage)
+    {
+        await Task.CompletedTask;
+        yield return (null, new DeliveryError(0, "N/A", "JSON_ROOT_ERROR", string.Format(InfraMessages.Parser_InvalidJsonStructure, errorMessage)));
+    }
 
-        if (items != null)
+    private static async IAsyncEnumerable<(DeliveryOrder? Order, DeliveryError? Error)> ParseItemsAsync(
+        IAsyncEnumerable<JsonDto?> items,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        int rowNumber = 0;
+        await foreach (var dto in items.WithCancellation(cancellationToken))
         {
-            await foreach (var dto in items.WithCancellation(cancellationToken))
+            rowNumber++;
+            if (dto == null)
             {
-                rowNumber++;
-                if (dto == null)
-                {
-                    yield return (null, new DeliveryError(rowNumber, "N/A", "NULL_RECORD", InfraMessages.Parser_NullJsonRecord));
-                    continue;
-                }
-
-                var order = new DeliveryOrder(
-                    OrderId: dto.ShipmentNumber ?? string.Empty,
-                    Customer: dto.Recipient ?? string.Empty,
-                    Address: dto.Destination ?? string.Empty,
-                    DeliveryDate: dto.ScheduledDate,
-                    Weight: dto.PackageWeight
-                );
-
-                yield return (order, null);
+                yield return (null, new DeliveryError(rowNumber, "N/A", "NULL_RECORD", InfraMessages.Parser_NullJsonRecord));
+                continue;
             }
+
+            var order = new DeliveryOrder(
+                OrderId: dto.ShipmentNumber ?? string.Empty,
+                Customer: dto.Recipient ?? string.Empty,
+                Address: dto.Destination ?? string.Empty,
+                DeliveryDate: dto.ScheduledDate,
+                Weight: dto.PackageWeight
+            );
+
+            yield return (order, null);
         }
     }
 }

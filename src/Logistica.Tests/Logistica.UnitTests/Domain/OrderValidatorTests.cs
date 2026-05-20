@@ -43,7 +43,7 @@ namespace Logistica.UnitTests.Domain
 
            
             Assert.Single(errors);
-            Assert.Equal(expectedErrorCode, errors[0].ErrorCode); // FIX S6608: [0] en vez de .First()
+            Assert.Equal(expectedErrorCode, errors[0].ErrorCode);
         }
 
         [Theory]
@@ -59,7 +59,7 @@ namespace Logistica.UnitTests.Domain
 
             
             Assert.Single(errors);
-            Assert.Equal("INVALID_DESTINATION", errors[0].ErrorCode); // FIX S6608: [0] en vez de .First()
+            Assert.Equal("INVALID_DESTINATION", errors[0].ErrorCode);
         }
 
         [Theory]
@@ -76,7 +76,7 @@ namespace Logistica.UnitTests.Domain
 
             
             Assert.Single(errors);
-            Assert.Equal("INVALID_WEIGHT", errors[0].ErrorCode); // FIX S6608: [0] en vez de .First()
+            Assert.Equal("INVALID_WEIGHT", errors[0].ErrorCode);
         }
 
         [Fact]
@@ -91,7 +91,7 @@ namespace Logistica.UnitTests.Domain
 
             
             Assert.Single(errors);
-            Assert.Equal("INVALID_DATE", errors[0].ErrorCode); // FIX S6608: [0] en vez de .First()
+            Assert.Equal("INVALID_DATE", errors[0].ErrorCode);
         }
 
         [Fact]

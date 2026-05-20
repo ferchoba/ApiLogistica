@@ -18,14 +18,14 @@ namespace Logistica.LoadTests
         {
             
             using var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri("http://localhost:5000");
+            httpClient.BaseAddress = new Uri("http://localhost:5297");
 
             var scenario = Scenario.Create("file_upload_scenario", async context =>
             {
                 
                 var csvPayload = new StringBuilder();
                 csvPayload.AppendLine("OrderId,Customer,Address,DeliveryDate,Weight");
-                for (int i = 0; i < 50; i++) // Lote de 50 registros por request
+                for (int i = 0; i < 50; i++) 
                 {
                     var guidPrefix = Guid.NewGuid().ToString().AsSpan(0, 8);
                     csvPayload.Append("ORD-");

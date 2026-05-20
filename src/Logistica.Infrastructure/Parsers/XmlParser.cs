@@ -60,12 +60,26 @@ public class XmlParser : IDeliveryParser
                 InfraMessages.Parser_MissingRequiredXmlNode));
         }
 
+        string dateStr = fields.DateStr?.Trim() ?? string.Empty;
+        if (!DateTime.TryParseExact(dateStr, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var deliveryDate))
+        {
+            return (null, new DeliveryError(rowNumber, fields.OrderId.Trim(), "INVALID_DATE",
+                string.Format(InfraMessages.Parser_ConversionError, "Date", "Format must be yyyy-MM-dd")));
+        }
+
+        string weightStr = fields.WeightStr?.Trim() ?? string.Empty;
+        if (!decimal.TryParse(weightStr, CultureInfo.InvariantCulture, out var weight))
+        {
+            return (null, new DeliveryError(rowNumber, fields.OrderId.Trim(), "INVALID_WEIGHT",
+                string.Format(InfraMessages.Parser_ConversionError, "Weight", "Invalid decimal value")));
+        }
+
         var order = new DeliveryOrder(
             OrderId: fields.OrderId.Trim(),
-            Customer: fields.Customer.Trim(),
-            Address: fields.Address.Trim(),
-            DeliveryDate: DateTime.ParseExact(fields.DateStr.Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture),
-            Weight: decimal.Parse(fields.WeightStr.Trim(), CultureInfo.InvariantCulture)
+            Customer: fields.Customer?.Trim() ?? string.Empty,
+            Address: fields.Address?.Trim() ?? string.Empty,
+            DeliveryDate: deliveryDate,
+            Weight: weight
         );
 
         return (order, null);

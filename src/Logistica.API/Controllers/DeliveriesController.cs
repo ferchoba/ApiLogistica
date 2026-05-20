@@ -1,4 +1,5 @@
 using Logistica.Domain.Interfaces;
+using Logistica.Application.Interfaces;
 using Logistica.Application.Services;
 using Logistica.Application.Dtos;
 using Logistica.API.Helpers;
@@ -18,7 +19,7 @@ public class DeliveriesController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadFile(string format, IFormFile file, CancellationToken cancellationToken)
     {
-        if (file == null || file.Length == 0)
+        if (file is not { Length: > 0 })
             return BadRequest(new { Error = ApiMessages.Http_EmptyFile });
         
         var formatError = FormatGuard.ValidateFileMatchesFormat(format, file);

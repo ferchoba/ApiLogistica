@@ -88,9 +88,7 @@ public class SqliteDeliveryRepository : IDeliveryRepository
         {
             await transaction.RollbackAsync(cancellationToken);
 
-            throw new InvalidOperationException(
-                string.Format(InfraMessages.Repo_BulkInsertFailed, orders.Count),
-                ex);
+            throw new InvalidOperationException(string.Format(InfraMessages.Repo_BulkInsertFailed, orders.Count),ex);
         }
     }
 }

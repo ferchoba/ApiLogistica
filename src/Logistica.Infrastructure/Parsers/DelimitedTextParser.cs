@@ -43,42 +43,37 @@ public abstract class DelimitedTextParser : IDeliveryParser
             if (string.IsNullOrWhiteSpace(line)) continue;
 
             var columns = line.Split(Delimiter);
-
-            if (columns.Length < 5)
-            {
-                yield return (null, new DeliveryError(rowNumber, "N/A", "INVALID_FORMAT", string.Format(InfraMessages.Parser_InsufficientColumns, FormatId)));
-                continue;
-            }
-
-            DeliveryOrder? order = null;
-            DeliveryError? error = null;
-
-            try
-            {
-                order = new DeliveryOrder(
-                    OrderId: columns[0].Trim(),
-                    Customer: columns[1].Trim(),
-                    Address: columns[2].Trim(),
-                    DeliveryDate: DateTime.ParseExact(columns[3].Trim(), DateFormat, CultureInfo.InvariantCulture),
-                    Weight: decimal.Parse(columns[4].Trim(), CultureInfo.InvariantCulture)
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, InfraMessages.Parser_ErrorParsingLine, rowNumber, columns[0].Trim());
-                error = new DeliveryError(rowNumber, columns[0].Trim(), "PARSE_ERROR", string.Format(InfraMessages.Parser_ConversionError, FormatId, ex.Message));
-            }
-
-            if (error != null)
-            {
-                yield return (null, error);
-            }
-            else
-            {
-                yield return (order, null);
-            }
+            yield return BuildOrderResult(columns, rowNumber);
         }
 
         _logger.LogInformation(InfraMessages.Parser_EndRead, FormatId, rowNumber);
+    }
+
+    protected (DeliveryOrder? Order, DeliveryError? Error) BuildOrderResult(string[] columns, int rowNumber)
+    {
+        if (columns.Length < 5)
+        {
+            return (null, new DeliveryError(rowNumber, "N/A", "INVALID_FORMAT", string.Format(InfraMessages.Parser_InsufficientColumns, FormatId)));
+        }
+
+        string orderId = columns[0].Trim();
+
+        try
+        {
+            var order = new DeliveryOrder(
+                OrderId: orderId,
+                Customer: columns[1].Trim(),
+                Address: columns[2].Trim(),
+                DeliveryDate: DateTime.ParseExact(columns[3].Trim(), DateFormat, CultureInfo.InvariantCulture),
+                Weight: decimal.Parse(columns[4].Trim(), CultureInfo.InvariantCulture)
+            );
+            return (order, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, InfraMessages.Parser_ErrorParsingLine, rowNumber, orderId);
+            var error = new DeliveryError(rowNumber, orderId, "PARSE_ERROR", string.Format(InfraMessages.Parser_ConversionError, FormatId, ex.Message));
+            return (null, error);
+        }
     }
 }

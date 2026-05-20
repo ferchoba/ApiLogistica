@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Logistica.API.Controllers;
 using Logistica.Application.Dtos;
+using Logistica.Application.Interfaces;
 using Logistica.Application.Services;
 using Logistica.Domain.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -56,8 +57,6 @@ public class DeliveriesControllerTests
         Assert.Contains("Inconsistencia de formato", errorMessage);
 
         
-        mockOrchestrator.Verify(
-            o => o.ProcessFileAsync(It.IsAny<Stream>(), It.IsAny<IDeliveryParser>(), It.IsAny<CancellationToken>()), 
-            Times.Never);
+        mockOrchestrator.Verify(o => o.ProcessFileAsync(It.IsAny<Stream>(), It.IsAny<IDeliveryParser>(), It.IsAny<CancellationToken>()),Times.Never);
     }
 }
