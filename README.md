@@ -1,10 +1,10 @@
-# Logistica 馃摝
+# Logistica
 
 Logistica es una plataforma para la agregar, validar y orquestar diferentes formatos de manifiestos de entrega.
 
 ## Arquitectura Base
 
-El sistema está construido siguiendo los principios de **Clean Architecture**, asegurando un bajo acoplamiento y alta cohesión mediante la separación estricta en capas (API, Application, Domain, Infrastructure).
+El sistema est谩 construido siguiendo los principios de **Clean Architecture**, asegurando un bajo acoplamiento y alta cohesi贸n mediante la separaci贸n estricta en capas (API, Application, Domain, Infrastructure).
 
 ## Prerrequisitos
 
@@ -32,6 +32,6 @@ Sigue estos pasos desde tu terminal para compilar y ejecutar el proyecto localme
 
 La API cuenta con una interfaz interactiva de documentaci贸n y pruebas prove铆da por Swagger. Una vez que la aplicaci贸n est茅 en ejecuci贸n, puedes acceder a ella navegando a:
 
-馃憠 `https://localhost:<puerto>/swagger` o `http://localhost:<puerto>/swagger`
+`https://localhost:<puerto>/swagger` o `http://localhost:<puerto>/swagger`
 
-Desde la interfaz de Swagger podr谩s interactuar con los endpoints disponibles, enviar cargas de prueba (CSV, JSON, TXT, XML) y validar la respuesta del motor de procesamiento y orquestaci贸n.
+Desde la interfaz de Swagger podr谩s interactuar con los endpoints disponibles, enviar cargas de prueba (CSV, JSON, TXT, XML) y validar la respuesta del motor de procesamiento y orquestaci贸n

@@ -20,19 +20,19 @@ namespace Logistica.UnitTests.Parsers
         [Fact]
         public async Task ParseAsync_WithValidLine_ReturnsDeliveryOrder()
         {
-            // Arrange
+            
             var csvContent = "OrderId,Customer,Address,DeliveryDate,Weight\n" +
                              "ORD-001,Cliente A,Dirección 1,2023-10-15,10.5";
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvContent));
 
-            // Act
+            
             var results = new List<(DeliveryOrder? Order, DeliveryError? Error)>();
             await foreach (var item in _sut.ParseAsync(stream))
             {
                 results.Add(item);
             }
 
-            // Assert
+            
             Assert.Single(results);
             Assert.NotNull(results[0].Order);
             Assert.Null(results[0].Error);
@@ -42,19 +42,19 @@ namespace Logistica.UnitTests.Parsers
         [Fact]
         public async Task ParseAsync_WithInvalidFormat_ReturnsDeliveryError()
         {
-            // Arrange
+            
             var csvContent = "OrderId,Customer,Address,DeliveryDate,Weight\n" +
                              "ORD-002,Cliente B"; // Registro incompleto (< 5 columnas)
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(csvContent));
 
-            // Act
+            
             var results = new List<(DeliveryOrder? Order, DeliveryError? Error)>();
             await foreach (var item in _sut.ParseAsync(stream))
             {
                 results.Add(item);
             }
 
-            // Assert
+            
             Assert.Single(results);
             Assert.Null(results[0].Order);
             Assert.NotNull(results[0].Error);

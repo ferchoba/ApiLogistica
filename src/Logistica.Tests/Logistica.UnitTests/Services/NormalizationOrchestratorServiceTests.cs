@@ -26,7 +26,7 @@ namespace Logistica.UnitTests.Services
         [Fact]
         public async Task ProcessFileAsync_WithValidAndDuplicateOrders_DetectsDuplicatesAndConsolidates()
         {
-            // Arrange
+            
             using var dummyStream = new MemoryStream();
             var order1 = new DeliveryOrder("ORD-001", "Cliente A", "Dir 1", DateTime.Now, 10m);
             var order2 = new DeliveryOrder("ORD-001", "Cliente B", "Dir 2", DateTime.Now, 20m); // Identificador duplicado
@@ -43,10 +43,10 @@ namespace Logistica.UnitTests.Services
             _parserMock.Setup(p => p.ParseAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
                        .Returns(GetMockedDataAsync());
 
-            // Act
+           
             var response = await _sut.ProcessFileAsync(dummyStream, _parserMock.Object);
 
-            // Assert
+            
             Assert.NotNull(response);
             Assert.Equal(2, response.Summary.TotalProcessed);
             

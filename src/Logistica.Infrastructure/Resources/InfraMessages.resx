@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Parser_StartRead" xml:space="preserve">
+    <value>Iniciando lectura de stream formato {0}.</value>
+  </data>
+  <data name="Parser_InsufficientColumns" xml:space="preserve">
+    <value>El registro {0} no tiene las 5 columnas requeridas.</value>
+  </data>
+  <data name="Parser_ErrorParsingLine" xml:space="preserve">
+    <value>Error de parseo en la línea {0} para la orden {1}</value>
+  </data>
+  <data name="Parser_ConversionError" xml:space="preserve">
+    <value>Error convirtiendo datos {0}: {1}</value>
+  </data>
+  <data name="Parser_EndRead" xml:space="preserve">
+    <value>Lectura de stream formato {0} finalizada. Total líneas escaneadas: {1}</value>
+  </data>
+  <data name="Parser_InvalidJsonStructure" xml:space="preserve">
+    <value>Estructura JSON inválida: {0}</value>
+  </data>
+  <data name="Parser_NullJsonRecord" xml:space="preserve">
+    <value>El objeto JSON es nulo.</value>
+  </data>
+  <data name="Parser_XmlProcessError" xml:space="preserve">
+    <value>Error procesando nodo XML: {0}</value>
+  </data>
+  <data name="Parser_MissingRequiredXmlNode" xml:space="preserve">
+    <value>Falta el nodo obligatorio &lt;Code&gt;.</value>
+  </data>
+  <data name="Repo_MissingConnectionString" xml:space="preserve">
+    <value>Fallo Crítico: La cadena de conexión 'Sqlite' no está configurada o es vacía en el archivo de entorno. Verifique la configuración de ConnectionStrings.</value>
+  </data>
+  <data name="Repo_BulkInsertStart" xml:space="preserve">
+    <value>Iniciando BulkInsertAsync atómico para {0} registros.</value>
+  </data>
+  <data name="Repo_BulkInsertSuccess" xml:space="preserve">
+    <value>Transacción atómica completada exitosamente. Se persistieron {0} registros.</value>
+  </data>
+  <data name="Repo_BulkInsertFailed" xml:space="preserve">
+    <value>BulkInsert falló para un lote de {0} registros. Transacción revertida. Ver InnerException para detalles.</value>
+  </data>
+</root>

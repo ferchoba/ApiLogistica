@@ -1,7 +1,13 @@
 using Logistica.Domain.Entities;
 using Logistica.Domain.Interfaces;
+using Logistica.Infrastructure.Resources;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Logistica.Infrastructure.Persistence.Sqlite;
 
@@ -20,42 +26,29 @@ public class SqliteDeliveryRepository : IDeliveryRepository
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            throw new InvalidOperationException("Fallo Crítico: La cadena de conexión 'Sqlite' no está configurada o es vacía en el archivo de entorno. Verifique la configuración de ConnectionStrings.");
+            throw new InvalidOperationException(InfraMessages.Repo_MissingConnectionString);
         }
 
         _connectionString = connectionString;
         EnsureDatabaseInitialized();
     }
 
-    
     private void EnsureDatabaseInitialized()
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         using var command = connection.CreateCommand();
-        command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS DeliveryOrders (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    OrderId TEXT NOT NULL,
-                    Customer TEXT NOT NULL,
-                    Address TEXT NOT NULL,
-                    DeliveryDate TEXT NOT NULL,
-                    Weight REAL NOT NULL
-                );
-                
-                CREATE INDEX IF NOT EXISTS IX_DeliveryOrders_OrderId ON DeliveryOrders(OrderId);
-            ";
+        command.CommandText = SqliteQueries.Schema.CreateDeliveryOrdersTable + "\n" + SqliteQueries.Schema.CreateOrderIdIndex;
         command.ExecuteNonQuery();
     }
 
-    
     public async Task BulkInsertAsync(IReadOnlyList<DeliveryOrder> orders, CancellationToken cancellationToken = default)
     {
         if (orders == null || orders.Count == 0) return;
 
         var orderCount = orders.Count;
-        _logger.LogInformation("Iniciando BulkInsertAsync atómico para {OrderCount} registros.", orderCount);
+        _logger.LogInformation(InfraMessages.Repo_BulkInsertStart, orderCount);
 
         using var connection = new SqliteConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
@@ -67,10 +60,7 @@ public class SqliteDeliveryRepository : IDeliveryRepository
             using var command = connection.CreateCommand();
             command.Transaction = transaction;
 
-            command.CommandText = @"
-                    INSERT INTO DeliveryOrders (OrderId, Customer, Address, DeliveryDate, Weight)
-                    VALUES ($orderId, $customer, $address, $deliveryDate, $weight);
-                ";
+            command.CommandText = SqliteQueries.DeliveryOrder.BulkInsert;
 
             var pOrderId = command.CreateParameter(); pOrderId.ParameterName = "$orderId"; command.Parameters.Add(pOrderId);
             var pCustomer = command.CreateParameter(); pCustomer.ParameterName = "$customer"; command.Parameters.Add(pCustomer);
@@ -92,15 +82,15 @@ public class SqliteDeliveryRepository : IDeliveryRepository
             }
 
             await transaction.CommitAsync(cancellationToken);
-            _logger.LogInformation("Transacción atómica completada exitosamente. Se persistieron {OrderCount} registros.", orderCount);
+            _logger.LogInformation(InfraMessages.Repo_BulkInsertSuccess, orderCount);
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellationToken);
 
             throw new InvalidOperationException(
-                $"BulkInsert falló para un lote de {orders.Count} registros. Transacción revertida. Ver InnerException para detalles.",
-                ex); 
+                string.Format(InfraMessages.Repo_BulkInsertFailed, orders.Count),
+                ex);
         }
     }
 }

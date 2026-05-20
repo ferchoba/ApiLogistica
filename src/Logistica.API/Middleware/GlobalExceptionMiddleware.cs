@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Logistica.API.Resources;
 
 namespace Logistica.API.Middleware;
 
@@ -19,12 +21,12 @@ public class GlobalExceptionMiddleware
     {
         try
         {
-            
             await _next(context);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Se ha producido una excepción no controlada en el sistema.");
+            _logger.LogError(ex, ApiMessages.Http_UnhandledException, context.Request.Path, context.Request.Method);
+
             await HandleExceptionAsync(context);
         }
     }
@@ -38,7 +40,7 @@ public class GlobalExceptionMiddleware
         {
             statusCode = context.Response.StatusCode,
             errorCode = "INTERNAL_SERVER_ERROR",
-            message = "Ha ocurrido un error inesperado procesando la solicitud. Por favor, contacte a soporte."
+            message = ApiMessages.Http_InternalServerError
         };
 
         var jsonResponse = JsonSerializer.Serialize(response);

@@ -1,28 +1,22 @@
+using Logistica.Application.Dtos;
 using Logistica.Domain.Entities;
 using Logistica.Domain.Interfaces;
+using Logistica.Infrastructure.Parsers.Serialization;
+using Logistica.Infrastructure.Resources;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace Logistica.Infrastructure.Parsers;
-
-public record OperadorBDto(
-    [property: JsonPropertyName("shipmentNumber")] string ShipmentNumber,
-    [property: JsonPropertyName("recipient")] string Recipient,
-    [property: JsonPropertyName("destination")] string Destination,
-    [property: JsonPropertyName("scheduledDate")] DateTime ScheduledDate,
-    [property: JsonPropertyName("packageWeight")] decimal PackageWeight
-);
-
-[JsonSerializable(typeof(OperadorBDto))]
-[JsonSerializable(typeof(IAsyncEnumerable<OperadorBDto>))]
-public partial class OperadorBJsonContext : JsonSerializerContext { }
 
 public class JsonParser : IDeliveryParser
 {
     private static readonly JsonSerializerOptions _serializerOptions = new()
     {
-        TypeInfoResolver = OperadorBJsonContext.Default,
+        TypeInfoResolver = JsonContext.Default,
         PropertyNameCaseInsensitive = true
     };
 
@@ -33,14 +27,14 @@ public class JsonParser : IDeliveryParser
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         int rowNumber = 0;
-        IAsyncEnumerable<OperadorBDto?>? items = null;
+        IAsyncEnumerable<JsonDto?>? items = null;
 
         bool initError = false;
         string initErrorMessage = string.Empty;
 
         try
         {
-            items = JsonSerializer.DeserializeAsyncEnumerable<OperadorBDto>(stream, _serializerOptions, cancellationToken);
+            items = JsonSerializer.DeserializeAsyncEnumerable<JsonDto>(stream, _serializerOptions, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -50,7 +44,7 @@ public class JsonParser : IDeliveryParser
 
         if (initError)
         {
-            yield return (null, new DeliveryError(0, "N/A", "JSON_ROOT_ERROR", $"Estructura JSON inválida: {initErrorMessage}"));
+            yield return (null, new DeliveryError(0, "N/A", "JSON_ROOT_ERROR", string.Format(InfraMessages.Parser_InvalidJsonStructure, initErrorMessage)));
             yield break;
         }
 
@@ -61,11 +55,10 @@ public class JsonParser : IDeliveryParser
                 rowNumber++;
                 if (dto == null)
                 {
-                    yield return (null, new DeliveryError(rowNumber, "N/A", "NULL_RECORD", "El objeto JSON es nulo."));
+                    yield return (null, new DeliveryError(rowNumber, "N/A", "NULL_RECORD", InfraMessages.Parser_NullJsonRecord));
                     continue;
                 }
 
-                
                 var order = new DeliveryOrder(
                     OrderId: dto.ShipmentNumber ?? string.Empty,
                     Customer: dto.Recipient ?? string.Empty,

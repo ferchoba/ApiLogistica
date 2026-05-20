@@ -1,7 +1,14 @@
 using Logistica.Domain.Entities;
 using Logistica.Domain.Interfaces;
+using Logistica.Infrastructure.Parsers.Models;
+using Logistica.Infrastructure.Resources;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Logistica.Infrastructure.Parsers;
@@ -29,15 +36,13 @@ public class XmlParser : IDeliveryParser
         }
     }
 
-
     private static bool IsDeliveryElement(XmlReader reader)
         => reader.NodeType == XmlNodeType.Element && reader.Name == "Delivery";
-
 
     private static async Task<(DeliveryOrder? Order, DeliveryError? Error)> ParseDeliveryNodeAsync(
         XmlReader reader, int rowNumber)
     {
-        var fields = new DeliveryFields();
+        var fields = new XmlDeliveryFields();
 
         try
         {
@@ -46,16 +51,14 @@ public class XmlParser : IDeliveryParser
         catch (Exception ex)
         {
             return (null, new DeliveryError(rowNumber, fields.OrderId, "PARSE_ERROR",
-                $"Error procesando nodo XML: {ex.Message}"));
+                string.Format(InfraMessages.Parser_XmlProcessError, ex.Message)));
         }
 
         if (string.IsNullOrWhiteSpace(fields.OrderId))
         {
             return (null, new DeliveryError(rowNumber, "N/A", "INVALID_FORMAT",
-                "Falta el nodo obligatorio <Code>."));
+                InfraMessages.Parser_MissingRequiredXmlNode));
         }
-
-        
 
         var order = new DeliveryOrder(
             OrderId: fields.OrderId.Trim(),
@@ -68,8 +71,7 @@ public class XmlParser : IDeliveryParser
         return (order, null);
     }
 
-
-    private static async Task ReadDeliveryFieldsAsync(XmlReader reader, DeliveryFields fields)
+    private static async Task ReadDeliveryFieldsAsync(XmlReader reader, XmlDeliveryFields fields)
     {
         using var subReader = reader.ReadSubtree();
         while (await subReader.ReadAsync())
@@ -85,15 +87,5 @@ public class XmlParser : IDeliveryParser
                 case "Kg":         fields.WeightStr = await subReader.ReadElementContentAsStringAsync(); break;
             }
         }
-    }
-
-
-    private sealed class DeliveryFields
-    {
-        public string OrderId { get; set; } = string.Empty;
-        public string Customer { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public string DateStr { get; set; } = string.Empty;
-        public string WeightStr { get; set; } = string.Empty;
     }
 }

@@ -1,6 +1,94 @@
-@Logistica.API_HostAddress = http://localhost:5297
+@host = http://localhost:5297
 
-GET {{Logistica.API_HostAddress}}/weatherforecast/
-Accept: application/json
+### ── 1. CSV Format Upload ──────────────────────────
+POST {{host}}/api/deliveries/upload/csv
+Content-Type: multipart/form-data; boundary=----BoundaryCSV
 
-###
+------BoundaryCSV
+Content-Disposition: form-data; name="file"; filename="test.csv"
+Content-Type: text/csv
+
+OrderId,Customer,Address,DeliveryDate,Weight
+ORD-10001,Almacenes Generales,Avenida de la Constitucion 45,2099-06-15,125.50
+ORD-10002,Distribuidora Norte,Calle Industrial Sur 12,2099-07-20,45.20
+------BoundaryCSV--
+
+
+### ── 2. TXT Format Upload (Pipe-Delimited, No Header) ─
+POST {{host}}/api/deliveries/upload/txt
+Content-Type: multipart/form-data; boundary=----BoundaryTXT
+
+------BoundaryTXT
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+ORD-20001|Transportes Gomez|Avenida Siempreviva 742|20990815|85.40
+ORD-20002|Servicios Logisticos|Calle Falsa 123|20990920|110.15
+------BoundaryTXT--
+
+
+### ── 3. JSON Format Upload ─────────────────────────
+POST {{host}}/api/deliveries/upload/json
+Content-Type: multipart/form-data; boundary=----BoundaryJSON
+
+------BoundaryJSON
+Content-Disposition: form-data; name="file"; filename="test.json"
+Content-Type: application/json
+
+[
+  {
+    "shipmentNumber": "ORD-30001",
+    "recipient": "Supermercados El Barrio",
+    "destination": "Plaza Mayor 10",
+    "scheduledDate": "2099-10-10T00:00:00Z",
+    "packageWeight": 250.75
+  },
+  {
+    "shipmentNumber": "ORD-30002",
+    "recipient": "Ferreteria Central",
+    "destination": "Callejón del Grano 5",
+    "scheduledDate": "2099-11-15T00:00:00Z",
+    "packageWeight": 15.30
+  }
+]
+------BoundaryJSON--
+
+
+### ── 4. XML Format Upload ──────────────────────────
+POST {{host}}/api/deliveries/upload/xml
+Content-Type: multipart/form-data; boundary=----BoundaryXML
+
+------BoundaryXML
+Content-Disposition: form-data; name="file"; filename="test.xml"
+Content-Type: application/xml
+
+<Deliveries>
+  <Delivery>
+    <Code>ORD-40001</Code>
+    <ClientName>Farmacia San Jose</ClientName>
+    <Location>Avenida Libertad 500</Location>
+    <Date>2099-12-05</Date>
+    <Kg>5.80</Kg>
+  </Delivery>
+  <Delivery>
+    <Code>ORD-40002</Code>
+    <ClientName>Importaciones Mundiales</ClientName>
+    <Location>Muelle Comercial 8</Location>
+    <Date>2099-12-20</Date>
+    <Kg>1250.00</Kg>
+  </Delivery>
+</Deliveries>
+------BoundaryXML--
+
+
+### ── 5. Cross-Format Validation Error (JSON Route, CSV File) ──
+POST {{host}}/api/deliveries/upload/json
+Content-Type: multipart/form-data; boundary=----BoundaryError
+
+------BoundaryError
+Content-Disposition: form-data; name="file"; filename="mismatch_data.csv"
+Content-Type: text/csv
+
+OrderId,Customer,Address,DeliveryDate,Weight
+ORD-99999,Invalid CrossFormat,Calle Falsa,2099-01-01,10.0
+------BoundaryError--

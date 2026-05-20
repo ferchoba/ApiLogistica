@@ -23,6 +23,7 @@
     <ProjectReference Include="..\..\Logistica.Domain\Logistica.Domain.csproj" />
     <ProjectReference Include="..\..\Logistica.Infrastructure\Logistica.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Logistica.Application\Logistica.Application.csproj" />
+    <ProjectReference Include="..\..\Logistica.API\Logistica.API.csproj" />
   </ItemGroup>
 
 </Project>

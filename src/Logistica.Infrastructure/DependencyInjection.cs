@@ -16,6 +16,8 @@ public static class DependencyInjection
         services.AddScoped<IDeliveryParser, TxtParser>();
         services.AddScoped<IDeliveryParser, XmlParser>();
 
+        services.AddScoped<IDeliveryParserFactory, DeliveryParserFactory>();
+
         return services;
     }
 }

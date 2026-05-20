@@ -1,5 +1,7 @@
 using Logistica.Domain.Entities;
 using Logistica.Domain.Interfaces;
+using Logistica.Infrastructure.Resources;
+using Microsoft.Extensions.Logging;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
@@ -23,7 +25,7 @@ public abstract class DelimitedTextParser : IDeliveryParser
         Stream stream,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Iniciando lectura de stream formato {FormatId}.", FormatId);
+        _logger.LogInformation(InfraMessages.Parser_StartRead, FormatId);
         
         using var reader = new StreamReader(stream);
         int rowNumber = 0;
@@ -44,7 +46,7 @@ public abstract class DelimitedTextParser : IDeliveryParser
 
             if (columns.Length < 5)
             {
-                yield return (null, new DeliveryError(rowNumber, "N/A", "INVALID_FORMAT", $"El registro {FormatId} no tiene las 5 columnas requeridas."));
+                yield return (null, new DeliveryError(rowNumber, "N/A", "INVALID_FORMAT", string.Format(InfraMessages.Parser_InsufficientColumns, FormatId)));
                 continue;
             }
 
@@ -63,8 +65,8 @@ public abstract class DelimitedTextParser : IDeliveryParser
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Error de parseo en la línea {RowNumber} para la orden {OrderId}", rowNumber, columns[0].Trim());
-                error = new DeliveryError(rowNumber, columns[0].Trim(), "PARSE_ERROR", $"Error convirtiendo datos {FormatId}: {ex.Message}");
+                _logger.LogWarning(ex, InfraMessages.Parser_ErrorParsingLine, rowNumber, columns[0].Trim());
+                error = new DeliveryError(rowNumber, columns[0].Trim(), "PARSE_ERROR", string.Format(InfraMessages.Parser_ConversionError, FormatId, ex.Message));
             }
 
             if (error != null)
@@ -77,6 +79,6 @@ public abstract class DelimitedTextParser : IDeliveryParser
             }
         }
 
-        _logger.LogInformation("Lectura de stream formato {FormatId} finalizada. Total líneas escaneadas: {RowNumber}", FormatId, rowNumber);
+        _logger.LogInformation(InfraMessages.Parser_EndRead, FormatId, rowNumber);
     }
 }
